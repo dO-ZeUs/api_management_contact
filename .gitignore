@@ -1,0 +1,30 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ===== Environnements virtuels =====
+.venv/
+venv/
+env/
+ENV/
+
+# ===== Variables d'environnement =====
+.env
+.env.*
+
+# ===== Logs =====
+*.log
+
+# ===== Fichiers système =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE / Editeurs =====
+.vscode/
+.idea/
+
+# ===== Fichiers temporaires =====
+*.tmp
+*.swp
