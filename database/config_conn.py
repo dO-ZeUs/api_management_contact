@@ -15,7 +15,7 @@ DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-def get_connection():
+def se_connecter():
     return psycopg2.connect(
         host=DB_HOST,
         port=DB_PORT,
