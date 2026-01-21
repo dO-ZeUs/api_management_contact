@@ -1,12 +1,12 @@
 """ DEFINIT LES DIFFERENTES DONNEES D'UN CONTACT """
 
 class Contact:
-    def __init__(self, id, nom, prenom, telephone, email):
-        self.id = id
+    def __init__(self, id_user, nom, prenom, telephone, email):
+        self.id_user = id_user
         self.nom = nom
         self.prenom = prenom
         self.telephone = telephone
         self.email = email
 
     def __str__(self):
-        return f"Nom: {self.nom}, Prénom: {self.prenom}, Téléphone: {self.telephone}, Email: {self.email}"
+        return f"ID: {self.id_user}, Nom: {self.nom}, Prénom: {self.prenom}, Téléphone: {self.telephone}, Email: {self.email}"

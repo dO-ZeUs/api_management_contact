@@ -50,6 +50,13 @@ def valider_telephone(telephone:str) -> bool:
     return re.match(regExTelephone, telephone) is not None
 
 
+def nettoyer_telephone(telephone: str) -> str:
+    """
+        Nettoyage : supprime tout sauf chiffres et +
+    """
+    return re.sub(r'[^\d+]', '', telephone.strip())
+
+
 def valider_email(email:str) -> bool:
     """
         Fonction permettant de valider l'email' :
@@ -59,7 +66,7 @@ def valider_email(email:str) -> bool:
     email = email.strip()
 
     if not email:
-        return False
+        return True
     
     regExEmail = r"^[\w\.-]+@[\w\.-]+\.\w{2,}$"
     return re.match(regExEmail, email) is not None
