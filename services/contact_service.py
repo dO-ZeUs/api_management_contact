@@ -15,28 +15,34 @@ def creer_nouveau_contact(nom, prenom, telephone, email):
     # VALIDATION DES DONNEES
     if not valider_nom(nom):
         raise ValueError("Le nom est invalide, il doit contenir au moins 3 caractères et uniquement des lettres.")
-    
+    nom_final = nom
+
     if not valider_prenom(prenom):
         raise ValueError("Le nom est invalide, il doit contenir au moins 3 caractères etuniquement des lettres.")
-    
+    prenom_final = prenom
+
     if not valider_telephone(telephone):
         raise ValueError("Le téléphone est invalide, il doit contenir au moins 8 caractères et uniquement des chiffres.")
     telephone_final = nettoyer_telephone(telephone)
     
-    if not valider_email(email):
-        raise ValueError("Format de l'email est invalide, ex:toto@gmail.com")
-    email_final = email.strip() if email.strip() else None
+    if email.strip():
+        if not valider_email(email):
+            raise ValueError("Format de l'email est invalide, ex:toto@gmail.com")
+        email_final = email.strip()
+    else:
+        email_final = None
+
 
     # VERIFIER L'UNICITE DU NUMERO DE TELEPHONE
     telephone_existant = rechercher_contact_telephone(telephone_final)
     if telephone_existant:
-        raise ValueError(f"Ce numéro de téléphone existe déjà par {telephone_existant.nom} {telephone_existant.prenom}.")
+        raise ValueError("Ce numéro de téléphone existe déjà.")
     
     # CREER L'OBJET CONTACT
     nouveau_contact = Contact(
-        id_user=None,
-        nom=nom,
-        prenom=prenom,
+        id=None,
+        nom=nom_final,
+        prenom=prenom_final,
         telephone=telephone_final,
         email=email_final
     )
@@ -76,17 +82,20 @@ def modifier_un_contact(id_contact, nom=None, prenom=None, telephone=None, email
             raise ValueError("Téléphone invalide")
         telephone_nettoye = nettoyer_telephone(telephone)
         contact_tel = rechercher_contact_telephone(telephone_nettoye)
-        if contact_tel and contact_tel.id_user != id_contact:
+        if contact_tel and contact_tel.id != id_contact:
             raise ValueError("Ce numéro de téléphone est déjà utilisé par un autre contact")
         telephone_final = telephone_nettoye
 
-    if email:
-        if not valider_email(email):
-            raise ValueError("Email invalide")
-        email_final = email.strip() if email.strip() else None
+    if email is not None:
+        if email == "":
+            email_final = None
+        else:
+            if valider_email(email):
+                raise ValueError("Email invalide")
+            email_final = email.strip()
 
     contact_modifier = Contact(
-        id_user=id_contact,
+        id=id_contact,
         nom=nom_final,
         prenom=prenom_final,
         telephone=telephone_final,

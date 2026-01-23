@@ -9,17 +9,25 @@ from psycopg2 import errors
 from models.contact import Contact
 from database.config_conn import se_connecter
 
+
+def set_search_path(cursor):
+    """
+    Définit le schéma PostgreSQL pour la session
+    """
+    cursor.execute('SET search_path TO "C_OPE";')
+
+
 def map_sql_contact(row):
     """
         PErmet de transformer une ligne
         de la BD en un objet(liste) Contact
     """
     return Contact(
-        id_user = row[0],
-        nom = row[1],
-        prenom = row[2],
-        telephone = row[3],
-        email = row[4]
+        id=row[0],
+        nom=row[1],
+        prenom=row[2],
+        telephone=row[3],
+        email=row[4]
     )
 
 def creer_contact(contact):
@@ -32,10 +40,12 @@ def creer_contact(contact):
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_creer_contatct = """
-                        INSERT INTO contacts (nom, prenom, telephone, email)
+                        INSERT INTO tb_contacts (nom, prenom, telephone, email)
                         VALUES (%s, %s, %s, %s)
-                        RETURNING id_user, nom, prenom, telephone, email;
+                        RETURNING id, nom, prenom, telephone, email;
                     """
 
         # exécuter la requête
@@ -54,9 +64,6 @@ def creer_contact(contact):
     except psycopg2.errors.UniqueViolation:
         conn.rollback()
         raise ValueError("Un ou plusieurs champs sont déjà utilisés par un autre contact.")
-    except psycopg2.Error as e:
-        conn.rollback()
-        raise Exception("Erreur lors de la création du contact dans la BD: {e}")
     finally:
         cursor.close()
         conn.close()
@@ -70,11 +77,13 @@ def modifier_contact(contact):
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_modifier_contact = """
-                                        UPDATE contacts
+                                        UPDATE tb_contacts
                                         SET nom = %s, prenom = %s, telephone = %s, email = %s
-                                        WHERE id_user = %s
-                                        RETURNING id_user, nom, prenom, telephone, email;
+                                        WHERE id = %s
+                                        RETURNING id, nom, prenom, telephone, email;
                                 """
         
         cursor.execute (
@@ -83,7 +92,7 @@ def modifier_contact(contact):
                 contact.prenom,
                 contact.telephone,
                 contact.email,
-                contact.id_user
+                contact.id
             )
         )
 
@@ -107,7 +116,7 @@ def modifier_contact(contact):
         
 
 
-def supprimer_contact(id_user):
+def supprimer_contact(id):
     """
         Supprimer un contact
     """
@@ -115,14 +124,16 @@ def supprimer_contact(id_user):
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_supprimer_contact = """
-                                        DELETE FROM contacts
-                                        WHERE id_user = %s
-                                        RETURNING id_user;
+                                        DELETE FROM tb_contacts
+                                        WHERE id = %s
+                                        RETURNING id;
                                     """
 
         cursor.execute(
-            requete_supprimer_contact, (id_user,)
+            requete_supprimer_contact, (id,)
         )
         row = cursor.fetchone()
         conn.commit()
@@ -145,14 +156,16 @@ def liste_contacts():
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_contacts = """
-                                SELECT id_user, nom, prenom, telephone, email
-                                FROM contacts;
+                                SELECT id, nom, prenom, telephone, email
+                                FROM tb_contacts;
                         """
         
         cursor.execute (requete_contacts)
         rows = cursor.fetchall()
-
+        # return [map_sql_contact(row) for row in rows]
         list_contact = []
         for row in rows:
             list_contact.append(map_sql_contact(row))
@@ -166,7 +179,7 @@ def liste_contacts():
 
 
 
-def rechercher_contact_id(id_user):
+def rechercher_contact_id(id):
     """
         Rechercher un contact
         via le nom
@@ -175,14 +188,16 @@ def rechercher_contact_id(id_user):
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_contact_id = """
-                                SELECT id_user, nom, prenom, telephone, email
-                                FROM contacts
-                                WHERE id_user = %s;
+                                SELECT id, nom, prenom, telephone, email
+                                FROM tb_contacts
+                                WHERE id = %s;
                             """
         
         cursor.execute (
-            requete_contact_id, (id_user,)
+            requete_contact_id, (id,)
         )
 
         row = cursor.fetchone()
@@ -208,9 +223,11 @@ def rechercher_contact_telephone(telephone):
         conn = se_connecter()
         cursor = conn.cursor()
 
+        set_search_path(cursor)
+
         requete_contact_telephone = """
-                                        SELECT id_user, nom, prenom, telephone, email
-                                        FROM contacts
+                                        SELECT id, nom, prenom, telephone, email
+                                        FROM tb_contacts
                                         WHERE telephone = %s;
                                     """
         
@@ -219,9 +236,6 @@ def rechercher_contact_telephone(telephone):
         )
 
         row = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
 
         if row:
             return map_sql_contact(row)
